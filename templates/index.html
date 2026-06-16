@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My To-Do App</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 60px auto; padding: 0 20px; }
+    h1 { font-size: 24px; margin-bottom: 20px; }
+    form { display: flex; gap: 8px; margin-bottom: 24px; }
+    input { flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    button { padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .task { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+    .done { text-decoration: line-through; color: #aaa; }
+    .actions a { font-size: 13px; margin-left: 10px; text-decoration: none; color: #4f46e5; }
+    .actions a.del { color: #e53e3e; }
+  </style>
+</head>
+<body>
+  <h1>My To-Do List</h1>
+
+  <form action="/add" method="POST">
+    <input name="task" placeholder="Add a new task..." required />
+    <button type="submit">Add</button>
+  </form>
+
+  {% for todo in todos %}
+  <div class="task">
+    <span class="{{ 'done' if todo.done else '' }}">{{ todo.text }}</span>
+    <div class="actions">
+      {% if not todo.done %}
+        <a href="/complete/{{ loop.index0 }}">Done</a>
+      {% endif %}
+      <a href="/delete/{{ loop.index0 }}" class="del">Delete</a>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% if not todos %}
+    <p style="color: #aaa; font-size: 14px;">No tasks yet. Add one above!</p>
+  {% endif %}
+</body>
+</html>
