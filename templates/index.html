@@ -3,6 +3,11 @@
 <head>
   <title>My Tasks</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#6c63ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="My Tasks">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -24,162 +29,37 @@
       border: 1px solid rgba(255,255,255,0.1);
       box-shadow: 0 20px 60px rgba(0,0,0,0.4);
     }
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
-    .title {
-      font-size: 22px;
-      font-weight: 700;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .lock-btn {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.15);
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 12px;
-      font-size: 13px;
-      cursor: pointer;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .title { font-size: 22px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .lock-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 16px; border-radius: 12px; font-size: 13px; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 6px; }
     .lock-btn:hover { background: rgba(255,255,255,0.18); }
-    .add-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .add-row input {
-      flex: 1;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 14px;
-      padding: 14px 18px;
-      color: #fff;
-      font-size: 14px;
-      outline: none;
-    }
+    .add-row { display: flex; gap: 10px; margin-bottom: 12px; }
+    .add-row input { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 14px 18px; color: #fff; font-size: 14px; outline: none; }
     .add-row input::placeholder { color: rgba(255,255,255,0.35); }
     .add-row input:focus { border-color: #6c63ff; }
-    .add-btn {
-      background: #6c63ff;
-      border: none;
-      border-radius: 14px;
-      width: 48px;
-      height: 48px;
-      color: #fff;
-      font-size: 24px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
+    .add-btn { background: #6c63ff; border: none; border-radius: 14px; width: 48px; height: 48px; color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .add-btn:hover { background: #5a52e0; }
-    .date-input {
-      width: 100%;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 14px;
-      padding: 12px 18px;
-      color: #fff;
-      font-size: 13px;
-      outline: none;
-      margin-bottom: 20px;
-    }
+    .date-input { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 12px 18px; color: #fff; font-size: 13px; outline: none; margin-bottom: 20px; }
     .date-input:focus { border-color: #6c63ff; }
-    .filters {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .filter-btn {
-      padding: 8px 18px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: transparent;
-      color: rgba(255,255,255,0.5);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 0.5px;
-    }
-    .filter-btn.active {
-      background: #6c63ff;
-      border-color: #6c63ff;
-      color: #fff;
-    }
+    .filters { display: flex; gap: 8px; margin-bottom: 20px; }
+    .filter-btn { padding: 8px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 600; cursor: pointer; letter-spacing: 0.5px; }
+    .filter-btn.active { background: #6c63ff; border-color: #6c63ff; color: #fff; }
     .task-list { margin-bottom: 20px; min-height: 80px; }
-    .task {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      gap: 10px;
-    }
+    .task { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.07); gap: 10px; }
     .task:last-child { border-bottom: none; }
     .task-left { display: flex; align-items: center; gap: 12px; flex: 1; }
-    .check {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      text-decoration: none;
-    }
-    .check.done-check {
-      background: #6c63ff;
-      border-color: #6c63ff;
-      color: #fff;
-      font-size: 12px;
-    }
+    .check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; text-decoration: none; }
+    .check.done-check { background: #6c63ff; border-color: #6c63ff; color: #fff; font-size: 12px; }
     .task-info { display: flex; flex-direction: column; }
     .task-text { font-size: 15px; color: #fff; }
     .task-text.done { text-decoration: line-through; color: rgba(255,255,255,0.3); }
     .due-date { font-size: 11px; color: #ff6b6b; margin-top: 2px; }
     .due-date.ok { color: rgba(255,255,255,0.3); }
-    .del-btn {
-      color: rgba(255,255,255,0.25);
-      text-decoration: none;
-      font-size: 18px;
-      padding: 4px 8px;
-    }
+    .del-btn { color: rgba(255,255,255,0.25); text-decoration: none; font-size: 18px; padding: 4px 8px; }
     .del-btn:hover { color: #ff6b6b; }
-    .empty {
-      text-align: center;
-      color: rgba(255,255,255,0.25);
-      font-size: 14px;
-      padding: 30px 0;
-    }
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: rgba(255,255,255,0.3);
-      padding-top: 16px;
-      border-top: 1px solid rgba(255,255,255,0.07);
-    }
-    .flash {
-      background: rgba(108,99,255,0.2);
-      border: 1px solid rgba(108,99,255,0.3);
-      color: #a89fff;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      margin-bottom: 16px;
-    }
+    .empty { text-align: center; color: rgba(255,255,255,0.25); font-size: 14px; padding: 30px 0; }
+    .footer { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.3); padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.07); }
+    .flash { background: rgba(108,99,255,0.2); border: 1px solid rgba(108,99,255,0.3); color: #a89fff; padding: 10px 14px; border-radius: 12px; font-size: 13px; margin-bottom: 16px; }
   </style>
 </head>
 <body>
@@ -190,9 +70,7 @@
     </div>
 
     {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <p class="flash">{{ messages[0] }}</p>
-      {% endif %}
+      {% if messages %}<p class="flash">{{ messages[0] }}</p>{% endif %}
     {% endwith %}
 
     <form method="POST" action="/add">
@@ -228,15 +106,14 @@
         <a href="/delete/{{ todo.id }}" class="del-btn">×</a>
       </div>
       {% endfor %}
-
       {% if not todos %}
         <p class="empty">No tasks here. Add one above!</p>
       {% endif %}
     </div>
 
     <div class="footer">
-      <span id="remaining">{{ todos|selectattr('done', 'equalto', false)|list|length }} remaining</span>
-      <span id="completed">{{ todos|selectattr('done', 'equalto', true)|list|length }} completed</span>
+      <span>{{ todos|selectattr('done', 'equalto', false)|list|length }} remaining</span>
+      <span>{{ todos|selectattr('done', 'equalto', true)|list|length }} completed</span>
     </div>
   </div>
 
@@ -251,24 +128,23 @@
       });
     }
 
-    // Notification sound
     function playSound() {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(880, ctx.currentTime);
-      oscillator.frequency.setValueAtTime(660, ctx.currentTime + 0.15);
-      oscillator.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
-      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.6);
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.setValueAtTime(660, ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.6);
     }
 
-    if ("Notification" in window) Notification.requestPermission();
+    if ('Notification' in window) Notification.requestPermission();
 
     function showNotification(taskName) {
       playSound();
@@ -295,6 +171,12 @@
 
     window.addEventListener('load', () => setTimeout(checkDueTasks, 1000));
     setInterval(checkDueTasks, 30 * 60 * 1000);
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/sw.js')
+        .then(() => console.log('SW registered'))
+        .catch(err => console.log('SW error:', err));
+    }
   </script>
 </body>
 </html>

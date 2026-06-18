@@ -3,6 +3,11 @@
 <head>
   <title>Verify Email</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#6c63ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="My Tasks">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -25,76 +30,17 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.4);
     }
     .logo { font-size: 36px; text-align: center; margin-bottom: 8px; }
-    h1 {
-      font-size: 24px;
-      font-weight: 700;
-      color: #fff;
-      text-align: center;
-      margin-bottom: 6px;
-    }
-    .subtitle {
-      font-size: 13px;
-      color: rgba(255,255,255,0.35);
-      text-align: center;
-      margin-bottom: 28px;
-    }
-    .flash {
-      background: rgba(255,100,100,0.15);
-      border: 1px solid rgba(255,100,100,0.3);
-      color: #ff9999;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-    .timer {
-      text-align: center;
-      font-size: 13px;
-      color: #ff6b6b;
-      margin-bottom: 20px;
-    }
+    h1 { font-size: 24px; font-weight: 700; color: #fff; text-align: center; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: rgba(255,255,255,0.35); text-align: center; margin-bottom: 28px; }
+    .flash { background: rgba(255,100,100,0.15); border: 1px solid rgba(255,100,100,0.3); color: #ff9999; padding: 10px 14px; border-radius: 12px; font-size: 13px; margin-bottom: 16px; text-align: center; }
+    .timer { text-align: center; font-size: 13px; color: #ff6b6b; margin-bottom: 20px; }
     .field { margin-bottom: 14px; }
-    label {
-      display: block;
-      font-size: 12px;
-      color: rgba(255,255,255,0.4);
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-    input {
-      width: 100%;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 14px;
-      padding: 16px 18px;
-      color: #fff;
-      font-size: 28px;
-      text-align: center;
-      letter-spacing: 12px;
-      outline: none;
-    }
+    label { display: block; font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
+    input { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 16px 18px; color: #fff; font-size: 28px; text-align: center; letter-spacing: 12px; outline: none; }
     input:focus { border-color: #6c63ff; background: rgba(108,99,255,0.1); }
-    .btn {
-      width: 100%;
-      background: #6c63ff;
-      border: none;
-      border-radius: 14px;
-      padding: 15px;
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 8px;
-    }
+    .btn { width: 100%; background: #6c63ff; border: none; border-radius: 14px; padding: 15px; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
     .btn:hover { background: #5a52e0; }
-    .bottom {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 13px;
-      color: rgba(255,255,255,0.3);
-    }
+    .bottom { text-align: center; margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.3); }
     .bottom a { color: #6c63ff; text-decoration: none; }
   </style>
 </head>
@@ -103,15 +49,10 @@
     <div class="logo">📧</div>
     <h1>Check Your Email</h1>
     <p class="subtitle">We sent a 6-digit code to your email address</p>
-
     {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <p class="flash">⚠️ {{ messages[0] }}</p>
-      {% endif %}
+      {% if messages %}<p class="flash">⚠️ {{ messages[0] }}</p>{% endif %}
     {% endwith %}
-
     <p class="timer">Code expires in: <span id="timer">10:00</span></p>
-
     <form method="POST">
       <div class="field">
         <label>Verification Code</label>
@@ -119,10 +60,8 @@
       </div>
       <button type="submit" class="btn">Verify Email</button>
     </form>
-
     <p class="bottom">Wrong email? <a href="/register">Go back</a></p>
   </div>
-
   <script>
     let seconds = 600;
     const timer = document.getElementById('timer');
@@ -131,11 +70,14 @@
       const m = Math.floor(seconds / 60).toString().padStart(2, '0');
       const s = (seconds % 60).toString().padStart(2, '0');
       timer.textContent = `${m}:${s}`;
-      if (seconds <= 0) {
-        clearInterval(interval);
-        timer.textContent = 'Expired!';
-      }
+      if (seconds <= 0) { clearInterval(interval); timer.textContent = 'Expired!'; }
     }, 1000);
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/sw.js')
+        .then(() => console.log('SW registered'))
+        .catch(err => console.log('SW error:', err));
+    }
   </script>
 </body>
 </html>
