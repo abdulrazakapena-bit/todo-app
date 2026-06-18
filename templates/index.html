@@ -1,134 +1,299 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My To-Do App</title>
+  <title>My Tasks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; max-width: 500px; margin: 60px auto; padding: 0 20px; }
-    h1 { font-size: 24px; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: #aaa; margin-bottom: 20px; }
-    form { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
-    .row { display: flex; gap: 8px; }
-    input[type="text"] { flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    input[type="datetime-local"] { flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    button { padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #4338ca; }
-    .task { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #1a1a4e, #24243e);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lock-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .lock-btn:hover { background: rgba(255,255,255,0.18); }
+    .add-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .add-row input {
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 14px 18px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+    .add-row input::placeholder { color: rgba(255,255,255,0.35); }
+    .add-row input:focus { border-color: #6c63ff; }
+    .add-btn {
+      background: #6c63ff;
+      border: none;
+      border-radius: 14px;
+      width: 48px;
+      height: 48px;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .add-btn:hover { background: #5a52e0; }
+    .date-input {
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 12px 18px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 20px;
+    }
+    .date-input:focus { border-color: #6c63ff; }
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .filter-btn {
+      padding: 8px 18px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+    }
+    .filter-btn.active {
+      background: #6c63ff;
+      border-color: #6c63ff;
+      color: #fff;
+    }
+    .task-list { margin-bottom: 20px; min-height: 80px; }
+    .task {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      gap: 10px;
+    }
+    .task:last-child { border-bottom: none; }
+    .task-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+    .check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+    .check.done-check {
+      background: #6c63ff;
+      border-color: #6c63ff;
+      color: #fff;
+      font-size: 12px;
+    }
     .task-info { display: flex; flex-direction: column; }
-    .done { text-decoration: line-through; color: #aaa; }
-    .due { font-size: 11px; color: #e53e3e; margin-top: 2px; }
-    .due.ok { color: #aaa; }
-    .actions a { font-size: 13px; margin-left: 10px; text-decoration: none; color: #4f46e5; }
-    .actions a.del { color: #e53e3e; }
-    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-    .logout { font-size: 13px; color: #aaa; text-decoration: none; }
-    .logout:hover { color: #e53e3e; }
-    .flash { color: #085041; font-size: 13px; margin-bottom: 12px; background: #E1F5EE; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #5DCAA5; }
+    .task-text { font-size: 15px; color: #fff; }
+    .task-text.done { text-decoration: line-through; color: rgba(255,255,255,0.3); }
+    .due-date { font-size: 11px; color: #ff6b6b; margin-top: 2px; }
+    .due-date.ok { color: rgba(255,255,255,0.3); }
+    .del-btn {
+      color: rgba(255,255,255,0.25);
+      text-decoration: none;
+      font-size: 18px;
+      padding: 4px 8px;
+    }
+    .del-btn:hover { color: #ff6b6b; }
+    .empty {
+      text-align: center;
+      color: rgba(255,255,255,0.25);
+      font-size: 14px;
+      padding: 30px 0;
+    }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .flash {
+      background: rgba(108,99,255,0.2);
+      border: 1px solid rgba(108,99,255,0.3);
+      color: #a89fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <h1>My To-Do List</h1>
-    <a href="/logout" class="logout">Logout</a>
-  </div>
-  <p class="subtitle">Welcome, {{ current_user.username }}!</p>
-
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <p class="flash">{{ messages[0] }}</p>
-    {% endif %}
-  {% endwith %}
-
-  <form method="POST" action="/add">
-    <div class="row">
-      <input type="text" name="task" placeholder="Add a new task..." required />
-      <button type="submit">Add</button>
+  <div class="card">
+    <div class="topbar">
+      <div class="title">📝 My Tasks</div>
+      <a href="/logout" class="lock-btn">🔒 Lock</a>
     </div>
-    <input type="datetime-local" name="due_date" />
-  </form>
 
-  {% for todo in todos %}
-  <div class="task">
-    <div class="task-info">
-      <span class="{{ 'done' if todo.done else '' }}">{{ todo.text }}</span>
-      {% if todo.due_date %}
-        <span class="due {{ 'ok' if todo.done else '' }}">
-          Due: {{ todo.due_date.strftime('%b %d, %Y %I:%M %p') }}
-        </span>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <p class="flash">{{ messages[0] }}</p>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/add">
+      <div class="add-row">
+        <input type="text" name="task" placeholder="Add a new task..." required />
+        <button type="submit" class="add-btn">+</button>
+      </div>
+      <input type="datetime-local" name="due_date" class="date-input" />
+    </form>
+
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterTasks('all', this)">ALL</button>
+      <button class="filter-btn" onclick="filterTasks('active', this)">ACTIVE</button>
+      <button class="filter-btn" onclick="filterTasks('done', this)">DONE</button>
+    </div>
+
+    <div class="task-list" id="task-list">
+      {% for todo in todos %}
+      <div class="task {{ 'task-done' if todo.done else 'task-active' }}">
+        <div class="task-left">
+          <a href="/complete/{{ todo.id }}" class="check {{ 'done-check' if todo.done else '' }}">
+            {{ '✓' if todo.done else '' }}
+          </a>
+          <div class="task-info">
+            <span class="task-text {{ 'done' if todo.done else '' }}">{{ todo.text }}</span>
+            {% if todo.due_date %}
+              <span class="due-date {{ 'ok' if todo.done else '' }}">
+                ⏰ {{ todo.due_date.strftime('%b %d, %Y %I:%M %p') }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+        <a href="/delete/{{ todo.id }}" class="del-btn">×</a>
+      </div>
+      {% endfor %}
+
+      {% if not todos %}
+        <p class="empty">No tasks here. Add one above!</p>
       {% endif %}
     </div>
-    <div class="actions">
-      {% if not todo.done %}
-        <a href="/complete/{{ todo.id }}">Done</a>
-      {% endif %}
-      <a href="/delete/{{ todo.id }}" class="del">Delete</a>
+
+    <div class="footer">
+      <span id="remaining">{{ todos|selectattr('done', 'equalto', false)|list|length }} remaining</span>
+      <span id="completed">{{ todos|selectattr('done', 'equalto', true)|list|length }} completed</span>
     </div>
   </div>
-  {% endfor %}
-
-  {% if not todos %}
-    <p style="color: #aaa; font-size: 14px;">No tasks yet. Add one above!</p>
-  {% endif %}
 
   <script>
-    // Play a 3-tone beep sound
+    function filterTasks(type, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.task').forEach(task => {
+        if (type === 'all') task.style.display = 'flex';
+        else if (type === 'active') task.style.display = task.classList.contains('task-active') ? 'flex' : 'none';
+        else if (type === 'done') task.style.display = task.classList.contains('task-done') ? 'flex' : 'none';
+      });
+    }
+
+    // Notification sound
     function playSound() {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
-
       oscillator.connect(gainNode);
       gainNode.connect(ctx.destination);
-
       oscillator.type = 'sine';
       oscillator.frequency.setValueAtTime(880, ctx.currentTime);
       oscillator.frequency.setValueAtTime(660, ctx.currentTime + 0.15);
       oscillator.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
-
       gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-
       oscillator.start(ctx.currentTime);
       oscillator.stop(ctx.currentTime + 0.6);
     }
 
-    // Request browser notification permission
-    if ("Notification" in window) {
-      Notification.requestPermission();
-    }
+    if ("Notification" in window) Notification.requestPermission();
 
     function showNotification(taskName) {
       playSound();
       if (Notification.permission === 'granted') {
-        const notification = new Notification('Task Due Soon! ⏰', {
+        const n = new Notification('Task Due Soon! ⏰', {
           body: taskName + ' is due within 24 hours!',
           icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827422.png'
         });
-        setTimeout(() => notification.close(), 5000);
+        setTimeout(() => n.close(), 5000);
       }
     }
 
     function checkDueTasks() {
-      const tasks = document.querySelectorAll('.due');
-      tasks.forEach(task => {
+      document.querySelectorAll('.due-date').forEach(task => {
         if (!task.classList.contains('ok')) {
-          const dueText = task.textContent.replace('Due: ', '').trim();
-          const dueDate = new Date(dueText);
-          const now = new Date();
-          const diff = dueDate - now;
+          const dueDate = new Date(task.textContent.replace('⏰ ', '').trim());
+          const diff = dueDate - new Date();
           if (diff > 0 && diff < 24 * 60 * 60 * 1000) {
-            const taskName = task.previousElementSibling.textContent;
-            showNotification(taskName);
+            showNotification(task.previousElementSibling.textContent);
           }
         }
       });
     }
 
-    // Check when page loads
-    window.addEventListener('load', () => {
-      setTimeout(checkDueTasks, 1000);
-    });
-
-    // Check every 30 minutes
+    window.addEventListener('load', () => setTimeout(checkDueTasks, 1000));
     setInterval(checkDueTasks, 30 * 60 * 1000);
   </script>
 </body>
