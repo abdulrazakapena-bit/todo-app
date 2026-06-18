@@ -36,12 +36,17 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
+
+
+
+# Read secure credentials dynamically from Render environment keys
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+
 app.config['MAIL_TIMEOUT'] = 10
 
 db = SQLAlchemy(app)
-mail = Mail(app)
+mail = Mail(app)a
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
