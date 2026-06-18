@@ -10,7 +10,15 @@ import random
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///todos.db'
+# Read from Render's environment variable first; fallback to local SQLite if not found
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///instance/todo.db')
+
+# Fix for SQLAlchemy to support 'postgresql://' instead of older 'postgres://' paths
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = False
