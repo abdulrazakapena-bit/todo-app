@@ -10,12 +10,25 @@ import random
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
-# Read from Render's environment variable first; fallback to local SQLite if not found
-database_url = os.environ.get('DATABASE_URL', 'sqlite:///instance/todo.db')
 
-# Fix for SQLAlchemy to support 'postgresql://' instead of older 'postgres://' paths
-if database_url and database_url.startswith("postgres://"):
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
+# Read from Render's environment variable first
+database_url = os.environ.get('DATABASE_URL')
+
+if not database_url:
+    # 1. Dynamically locate your absolute root directory
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    instance_dir = os.path.join(base_dir, 'instance')
+    
+    # 2. Force production server to create the instance folder if it's missing
+    if not os.path.exists(instance_dir):
+        os.makedirs(instance_dir)
+        
+    # 3. Form a clean absolute path to the SQLite file
+    database_url = f"sqlite:///{os.path.join(instance_dir, 'database.db')}"
+else:
+    # Fix for SQLAlchemy to support 'postgresql://' instead of legacy 'postgres://'
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 
