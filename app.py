@@ -46,7 +46,7 @@ app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_TIMEOUT'] = 10
 
 db = SQLAlchemy(app)
-mail = Mail(app)a
+mail = Mail(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
