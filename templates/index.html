@@ -4,32 +4,63 @@
   <title>My To-Do App</title>
   <style>
     body { font-family: sans-serif; max-width: 500px; margin: 60px auto; padding: 0 20px; }
-    h1 { font-size: 24px; margin-bottom: 20px; }
-    form { display: flex; gap: 8px; margin-bottom: 24px; }
-    input { flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    h1 { font-size: 24px; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #aaa; margin-bottom: 20px; }
+    form { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+    .row { display: flex; gap: 8px; }
+    input[type="text"] { flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    input[type="datetime-local"] { flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
     button { padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #4338ca; }
     .task { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+    .task-info { display: flex; flex-direction: column; }
     .done { text-decoration: line-through; color: #aaa; }
+    .due { font-size: 11px; color: #e53e3e; margin-top: 2px; }
+    .due.ok { color: #aaa; }
     .actions a { font-size: 13px; margin-left: 10px; text-decoration: none; color: #4f46e5; }
     .actions a.del { color: #e53e3e; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .logout { font-size: 13px; color: #aaa; text-decoration: none; }
+    .logout:hover { color: #e53e3e; }
+    .flash { color: #085041; font-size: 13px; margin-bottom: 12px; background: #E1F5EE; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #5DCAA5; }
   </style>
 </head>
 <body>
-  <h1>My To-Do List</h1>
+  <div class="topbar">
+    <h1>My To-Do List</h1>
+    <a href="/logout" class="logout">Logout</a>
+  </div>
+  <p class="subtitle">Welcome, {{ current_user.username }}!</p>
 
-  <form action="/add" method="POST">
-    <input name="task" placeholder="Add a new task..." required />
-    <button type="submit">Add</button>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <p class="flash">{{ messages[0] }}</p>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" action="/add">
+    <div class="row">
+      <input type="text" name="task" placeholder="Add a new task..." required />
+      <button type="submit">Add</button>
+    </div>
+    <input type="datetime-local" name="due_date" />
   </form>
 
   {% for todo in todos %}
   <div class="task">
-    <span class="{{ 'done' if todo.done else '' }}">{{ todo.text }}</span>
+    <div class="task-info">
+      <span class="{{ 'done' if todo.done else '' }}">{{ todo.text }}</span>
+      {% if todo.due_date %}
+        <span class="due {{ 'ok' if todo.done else '' }}">
+          Due: {{ todo.due_date.strftime('%b %d, %Y %I:%M %p') }}
+        </span>
+      {% endif %}
+    </div>
     <div class="actions">
       {% if not todo.done %}
-        <a href="/complete/{{ loop.index0 }}">Done</a>
+        <a href="/complete/{{ todo.id }}">Done</a>
       {% endif %}
-      <a href="/delete/{{ loop.index0 }}" class="del">Delete</a>
+      <a href="/delete/{{ todo.id }}" class="del">Delete</a>
     </div>
   </div>
   {% endfor %}
@@ -37,5 +68,68 @@
   {% if not todos %}
     <p style="color: #aaa; font-size: 14px;">No tasks yet. Add one above!</p>
   {% endif %}
+
+  <script>
+    // Play a 3-tone beep sound
+    function playSound() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+      oscillator.frequency.setValueAtTime(660, ctx.currentTime + 0.15);
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
+
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.6);
+    }
+
+    // Request browser notification permission
+    if ("Notification" in window) {
+      Notification.requestPermission();
+    }
+
+    function showNotification(taskName) {
+      playSound();
+      if (Notification.permission === 'granted') {
+        const notification = new Notification('Task Due Soon! ⏰', {
+          body: taskName + ' is due within 24 hours!',
+          icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827422.png'
+        });
+        setTimeout(() => notification.close(), 5000);
+      }
+    }
+
+    function checkDueTasks() {
+      const tasks = document.querySelectorAll('.due');
+      tasks.forEach(task => {
+        if (!task.classList.contains('ok')) {
+          const dueText = task.textContent.replace('Due: ', '').trim();
+          const dueDate = new Date(dueText);
+          const now = new Date();
+          const diff = dueDate - now;
+          if (diff > 0 && diff < 24 * 60 * 60 * 1000) {
+            const taskName = task.previousElementSibling.textContent;
+            showNotification(taskName);
+          }
+        }
+      });
+    }
+
+    // Check when page loads
+    window.addEventListener('load', () => {
+      setTimeout(checkDueTasks, 1000);
+    });
+
+    // Check every 30 minutes
+    setInterval(checkDueTasks, 30 * 60 * 1000);
+  </script>
 </body>
 </html>
