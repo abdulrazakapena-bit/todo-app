@@ -11,38 +11,17 @@ import random
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 
-# Read from Render's environment variable first
-database_url = os.environ.get('DATABASE_URL')
-
-if not database_url:
-    # 1. Dynamically locate your absolute root directory
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-    instance_dir = os.path.join(base_dir, 'instance')
-    
-    # 2. Force production server to create the instance folder if it's missing
-    if not os.path.exists(instance_dir):
-        os.makedirs(instance_dir)
-        
-    # 3. Form a clean absolute path to the SQLite file
-    database_url = f"sqlite:///{os.path.join(instance_dir, 'database.db')}"
-else:
-    # Fix for SQLAlchemy to support 'postgresql://' instead of legacy 'postgres://'
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql://", 1)
-
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///todos.db')
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-
-
-
-# Read secure credentials dynamically from Render environment keys
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-
 app.config['MAIL_TIMEOUT'] = 10
 
 db = SQLAlchemy(app)
@@ -138,7 +117,6 @@ def register():
         email = request.form.get("email").strip().lower()
         password = request.form.get("password")
 
-        # Username validation
         if len(username) < 3:
             flash("Username must be at least 3 characters long.")
             return redirect(url_for("register"))
@@ -147,7 +125,6 @@ def register():
             flash("Username can only contain letters and numbers, no spaces or symbols.")
             return redirect(url_for("register"))
 
-        # Email validation
         if "@" not in email or "." not in email.split("@")[-1]:
             flash("Please enter a valid email address e.g. yourname@gmail.com")
             return redirect(url_for("register"))
@@ -156,37 +133,31 @@ def register():
             flash("Email address cannot contain spaces.")
             return redirect(url_for("register"))
 
-        # Password length check
         if len(password) < 8:
             flash("Password must be at least 8 characters long.")
             return redirect(url_for("register"))
 
-        # Password strength validation
         has_upper = any(c.isupper() for c in password)
         has_lower = any(c.islower() for c in password)
         has_digit = any(c.isdigit() for c in password)
         has_special = any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?' for c in password)
 
         if not all([has_upper, has_lower, has_digit, has_special]):
-            flash("Password must contain: uppercase letter, lowercase letter, number and special character e.g. Hello1@b")
+            flash("Password must contain: uppercase, lowercase, number and special character e.g. Hello1@b")
             return redirect(url_for("register"))
 
-        # Check if email already exists
         existing_email = User.query.filter_by(email=email).first()
         if existing_email:
             flash("This email is already registered. Please login instead.")
             return redirect(url_for("register"))
 
-        # Check if username already exists
         existing_username = User.query.filter_by(username=username).first()
         if existing_username:
             flash("This username is already taken. Please choose another one.")
             return redirect(url_for("register"))
 
-        # Generate 6-digit code
         code = str(random.randint(100000, 999999))
 
-        # Save details in session temporarily
         session['pending_user'] = {
             'username': username,
             'email': email,
@@ -195,7 +166,6 @@ def register():
             'expires': (datetime.utcnow() + timedelta(minutes=10)).isoformat()
         }
 
-        # Send verification email
         try:
             msg = Message(
                 subject="Your verification code",
@@ -203,16 +173,13 @@ def register():
                 recipients=[email]
             )
             msg.body = f"Hi {username},\n\nYour verification code is: {code}\n\nThis code expires in 10 minutes.\n\nIf you did not request this, ignore this email."
-        
-        try:
             mail.send(msg)
-            flash("A 6-digit verification code has been sent to your email.")
-            return redirect(url_for("verify"))
+            flash("A 6-digit verification code has been sent to your email!")
         except Exception as e:
-            print(f"Mail delivery failed, but bypassing to verification: {e}")
-            flash("Account created, but email notification failed. Please verify.")
-            return redirect(url_for("verify"))
+            flash(f"Could not send email. Error: {str(e)}")
+            return redirect(url_for("register"))
 
+        return redirect(url_for("verify"))
 
     return render_template("register.html")
 
@@ -226,14 +193,12 @@ def verify():
             flash("Session expired. Please register again.")
             return redirect(url_for("register"))
 
-        # Check if code expired
         expires = datetime.fromisoformat(pending['expires'])
         if datetime.utcnow() > expires:
             session.pop('pending_user', None)
             flash("Code expired. Please register again.")
             return redirect(url_for("register"))
 
-        # Check if code matches
         if entered_code == pending['code']:
             user = User(
                 username=pending['username'],
@@ -269,9 +234,11 @@ def logout():
     logout_user()
     return redirect(url_for("login"))
 
-# Create the database tables globally for Gunicorn
-with app.app_context():
-    db.create_all()
+@app.route("/ping")
+def ping():
+    return "pong", 200
 
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.run(debug=True, host="0.0.0.0")
