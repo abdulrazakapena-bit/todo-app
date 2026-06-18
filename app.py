@@ -203,12 +203,16 @@ def register():
                 recipients=[email]
             )
             msg.body = f"Hi {username},\n\nYour verification code is: {code}\n\nThis code expires in 10 minutes.\n\nIf you did not request this, ignore this email."
+        
+        try:
             mail.send(msg)
-            flash("A 6-digit verification code has been sent to your email!")
+            flash("A 6-digit verification code has been sent to your email.")
             return redirect(url_for("verify"))
         except Exception as e:
-            flash(f"Could not send email. Error: {str(e)}")
-            return redirect(url_for("register"))
+            print(f"Mail delivery failed, but bypassing to verification: {e}")
+            flash("Account created, but email notification failed. Please verify.")
+            return redirect(url_for("verify"))
+
 
     return render_template("register.html")
 
