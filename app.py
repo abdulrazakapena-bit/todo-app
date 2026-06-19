@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_mail import Mail, Message
-from apscheduler.schedulers.background import BackgroundScheduler
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import os
@@ -22,7 +21,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-app.config['MAIL_TIMEOUT'] = 10
+app.config['MAIL_TIMEOUT'] = 15
 
 db = SQLAlchemy(app)
 mail = Mail(app)
@@ -46,33 +45,6 @@ class Todo(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-def send_reminders():
-    with app.app_context():
-        now = datetime.utcnow()
-        soon = now + timedelta(hours=24)
-        todos = Todo.query.filter(
-            Todo.done == False,
-            Todo.due_date != None,
-            Todo.due_date <= soon,
-            Todo.due_date >= now
-        ).all()
-        for todo in todos:
-            user = User.query.get(todo.user_id)
-            msg = Message(
-                subject="Reminder: Task due soon!",
-                sender=os.environ.get('MAIL_USERNAME'),
-                recipients=[user.email]
-            )
-            msg.body = f"Hi {user.username},\n\nYour task '{todo.text}' is due on {todo.due_date.strftime('%Y-%m-%d %H:%M')}.\n\nDon't forget to complete it!\n\nYour To-Do App"
-            try:
-                mail.send(msg)
-            except:
-                pass
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(send_reminders, 'interval', hours=1)
-scheduler.start()
 
 @app.route("/")
 @login_required
