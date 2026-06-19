@@ -29,10 +29,8 @@
       border: 1px solid rgba(255,255,255,0.1);
       box-shadow: 0 20px 60px rgba(0,0,0,0.4);
     }
-    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .topbar { display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
     .title { font-size: 22px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .lock-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 16px; border-radius: 12px; font-size: 13px; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 6px; }
-    .lock-btn:hover { background: rgba(255,255,255,0.18); }
     .add-row { display: flex; gap: 10px; margin-bottom: 12px; }
     .add-row input { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 14px 18px; color: #fff; font-size: 14px; outline: none; }
     .add-row input::placeholder { color: rgba(255,255,255,0.35); }
@@ -59,19 +57,13 @@
     .del-btn:hover { color: #ff6b6b; }
     .empty { text-align: center; color: rgba(255,255,255,0.25); font-size: 14px; padding: 30px 0; }
     .footer { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.3); padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.07); }
-    .flash { background: rgba(108,99,255,0.2); border: 1px solid rgba(108,99,255,0.3); color: #a89fff; padding: 10px 14px; border-radius: 12px; font-size: 13px; margin-bottom: 16px; }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="topbar">
       <div class="title">📝 My Tasks</div>
-      <a href="/logout" class="lock-btn">🔒 Lock</a>
     </div>
-
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}<p class="flash">{{ messages[0] }}</p>{% endif %}
-    {% endwith %}
 
     <form method="POST" action="/add">
       <div class="add-row">
